@@ -1,54 +1,22 @@
 
 
-import format from "date-fns/format";
-import getDay from "date-fns/getDay";
-import parse from "date-fns/parse";
-import startOfWeek from "date-fns/startOfWeek";
+
 import React, { useEffect, useState } from "react";
-import { Calendar, dateFnsLocalizer } from "react-big-calendar";
+import { Calendar, momentLocalizer , View} from 'react-big-calendar'
+import moment from 'moment'
 import "react-big-calendar/lib/css/react-big-calendar.css";
-import DatePicker from "react-datepicker";
-import "react-datepicker/dist/react-datepicker.css";
 import { addEvent, getDatafromLS } from "./localStorage";
-
-
-
-const locales = {
-    "en-US": require("date-fns/locale/en-US"),
-};
-const localizer = dateFnsLocalizer({
-    format,
-    parse,
-    startOfWeek,
-    getDay,
-    locales,
-});
-
-
-
-export const myresources = [
-	{ id: 1, title: "sun" },
-	{ id: 2, title: "mon" },
-	{ id: 3, title: "tues" },
-	{ id: 4, title: "wed" },
-	{ id: 5, title: "thurs" },
-	{ id: 6, title: "Fri" },
-	{ id: 7, title: "sat" },
-
-];
-
+const localizer = momentLocalizer(moment)
 function App() {
 
-  
   const[newEvent, setNewEvent] = useState({ title :"" , start:"", end:"" })
      const[allEvents, setAllEvents] = useState([])
-     const[defaultDate , setDefaultDate]=useState(new Date())
-     
-     function filterDate(date, hour){
-      setDefaultDate(new Date(date + 'T' +hour))
-     }
-    //  console.log(allEvents)
+   
+  
+   //  console.log(allEvents)
 
+
+ /// gwt event in our local torage
     useEffect (()=>{
       setAllEvents(getDatafromLS())
     },[])
@@ -77,30 +45,35 @@ function App() {
             break;
          }
 
-   }
-    
-    
-    // setAllEvents([...allEvents, newEvent]);
+   }  
+    // store in local storage 
     addEvent({...newEvent})
     window.location.reload()
-    // localStorage.setItem('allEvents',JSON.stringify(newEvent))
+
     console.log(newEvent)
      }
 
-
+   const Event=  allEvents.map((event)=>{
+      //new date (y m d h m)
+      return{
+        title:event.title,
+        start:new Date(event.start),
+        end: new Date(event.end)
+      }
+     })
+     console.log(Event)
     
- 
   return (
     <div className="App">
    <div className="container">
    <div className="row">
    <div className="col-md-4">
-   <h3>Add Period</h3>
+   <h3 className="mt-5">Add Period</h3>
      <div className="mt-5 mb-5">
-                <input type="text" placeholder="Add Title" style={{ width: "20%", marginRight: "10px" }} value={newEvent.title} onChange={(e) => setNewEvent({ ...newEvent, title: e.target.value })} />
-                <DatePicker placeholderText="Start Date" style={{ marginRight: "10px" }} timeFormat="HH:mm" dateFormat="MMMM d ,yyyy h:mm am"  showTimeSelect selected={newEvent.start} onChange={(start) => setNewEvent({ ...newEvent, start })} />
-                <DatePicker placeholderText="End Date" selected={newEvent.end} timeFormat="HH:mm" dateFormat="MMMM d ,yyyy h:mm am"  showTimeSelect onChange={(end) => setNewEvent({ ...newEvent, end })} />
-                <button stlye={{ marginTop: "10px" }} onClick={handleAddEvent}>
+                <input type="text" placeholder="Add Title"  className=" my-3 w-100"  value={newEvent.title} onChange={(e) => setNewEvent({ ...newEvent, title: e.target.value })} required />
+                <input type="datetime-local" placeholder="start date" className="mt-2 my-3 w-100" value={newEvent.start} onChange={(e) => setNewEvent({ ...newEvent, start: e.target.value })} required/>
+                <input type="datetime-local" placeholder="end date" className="mt-2 my-3 w-100"alue={newEvent.end} onChange={(e) => setNewEvent({ ...newEvent, end: e.target.value })} required/>
+                <button className="mt-2" onClick={handleAddEvent}>
                     Add Event
                 </button>
             </div>
@@ -112,14 +85,11 @@ function App() {
     <div className="col-md-8">
     <div className="mt-5 mb-5">
               <Calendar
-                      events={allEvents}
-                      resources={myresources}
-                      localizer={localizer}
-                      defaultView="month"
-                       defaultDate={defaultDate}
-                      startAccessor="start"
-                      endAccessor="end"
-                      style={{ height: 700 }}
+                       localizer={localizer}
+                      events={Event}
+                      startAccessor={"start"}
+                      endAccessor={"end"}
+                      style={{ height: 500 }}
                   />
                   </div>
           </div>
@@ -129,8 +99,6 @@ function App() {
          
   );
 }
-//https://docs.google.com/document/d/1G1Impq2MPrlHCzOz5BHavw0mkfuDBKVbrTwheq1HDo8/edit 
+
 export default App;
-
-
 
